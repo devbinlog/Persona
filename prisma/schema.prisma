@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ConversationType: "AI" | "LOUNGE" | "DM" | "CHARACTER_SIM"
+// AuthorType: "USER" | "AI" | "CHARACTER"
+// EmotionState: "CALM" | "SPARK" | "ECHO" | "STATIC" | "OVERDRIVE" | "HOLLOW"
+// LogCardType: "DAILY" | "SCENE" | "SHARE"
+// ReportTargetType: "MESSAGE" | "USER" | "CARD" | "SCENE"
+
+model User {
+  id        String   @id @default(cuid())
+  nickname  String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownedConversations   Conversation[]  @relation("ConversationOwner")
+  peeredConversations  Conversation[]  @relation("ConversationPeer")
+  messages             Message[]
+  emotionState         EmotionState?
+  memorySummary        MemorySummary?
+  cards                LogCard[]
+  blocks               Block[]         @relation("Blocker")
+  blockedBy            Block[]         @relation("Blocked")
+  reports              Report[]        @relation("Reporter")
+  recommendations      Recommendation[]
+}
+
+model Character {
+  id                String   @id @default(cuid())
+  slug              String   @unique
+  displayNameHint   String
+  personaConfigJson String
+  visualConfigJson  String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  simMessages Message[] @relation("CharacterMessages")
+}
+
+model Conversation {
+  id          String   @id @default(cuid())
+  // ConversationType: "AI" | "LOUNGE" | "DM" | "CHARACTER_SIM"
+  type        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  ownerUserId String?
+  ownerUser   User?    @relation("ConversationOwner", fields: [ownerUserId], references: [id])
+  peerUserId  String?
+  peerUser    User?    @relation("ConversationPeer", fields: [peerUserId], references: [id])
+
+  messages Message[]
+  logCards LogCard[]
+}
+
+model Message {
+  id                String       @id @default(cuid())
+  conversationId    String
+  conversation      Conversation @relation(fields: [conversationId], references: [id])
+  // AuthorType: "USER" | "AI" | "CHARACTER"
+  authorType        String
+  authorUserId      String?
+  authorUser        User?        @relation(fields: [authorUserId], references: [id])
+  authorCharacterId String?
+  authorCharacter   Character?   @relation("CharacterMessages", fields: [authorCharacterId], references: [id])
+  content           String
+  createdAt         DateTime     @default(now())
+  isFlagged         Boolean      @default(false)
+  flaggedReason     String?
+}
+
+model EmotionState {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  // EmotionEnum: "CALM" | "SPARK" | "ECHO" | "STATIC" | "OVERDRIVE" | "HOLLOW"
+  state       String
+  signalsJson String
+  updatedAt   DateTime @updatedAt
+}
+
+model MemorySummary {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  summary         String
+  preferencesJson String
+  updatedAt       DateTime @updatedAt
+}
+
+model Recommendation {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  queryJson String
+  itemsJson String
+  createdAt DateTime @default(now())
+}
+
+model LogCard {
+  id             String        @id @default(cuid())
+  // LogCardType: "DAILY" | "SCENE" | "SHARE"
+  type           String
+  payloadJson    String
+  createdAt      DateTime      @default(now())
+  userId         String?
+  user           User?         @relation(fields: [userId], references: [id])
+  conversationId String?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+}
+
+model Report {
+  id             String   @id @default(cuid())
+  reporterUserId String
+  reporter       User     @relation("Reporter", fields: [reporterUserId], references: [id])
+  // ReportTargetType: "MESSAGE" | "USER" | "CARD" | "SCENE"
+  targetType     String
+  targetId       String
+  reason         String
+  createdAt      DateTime @default(now())
+}
+
+model Block {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation("Blocker", fields: [userId], references: [id])
+  targetUserId String
+  targetUser   User     @relation("Blocked", fields: [targetUserId], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@unique([userId, targetUserId])
+}
