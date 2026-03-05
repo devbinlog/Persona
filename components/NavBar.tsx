@@ -3,36 +3,45 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Home" },
-  { href: "/chat", label: "Chat" },
-  { href: "/recommend", label: "Recommend" },
-  { href: "/lounge", label: "Lounge" },
-  { href: "/character-lounge", label: "Character Lounge" },
-  { href: "/archive", label: "Archive" },
+  { href: "/chat",        label: "Chat" },
+  { href: "/recommend",   label: "Recommend" },
+  { href: "/vibes",       label: "Vibes" },
+  { href: "/lounge",      label: "Lounge" },
+  { href: "/ai-design",   label: "AI Design" },
+  { href: "/archive",     label: "Archive" },
 ];
 
 export default function NavBar() {
   const pathname = usePathname();
 
   return (
-    <nav className="border-b border-ep-border bg-ep-surface/80 backdrop-blur-sm sticky top-0 z-50">
+    <nav className="bg-white border-b border-ep-border sticky top-0 z-50 shadow-sm">
       <div className="max-w-4xl mx-auto px-4 flex items-center gap-1 h-14 overflow-x-auto">
-        <span className="text-ep-accent font-bold mr-4 text-sm tracking-widest shrink-0">
-          ECHO
-        </span>
-        {NAV_ITEMS.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`px-3 py-1.5 rounded-md text-sm transition-colors shrink-0 ${
-              pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
-                ? "bg-ep-accent/20 text-ep-accent"
-                : "text-gray-400 hover:text-white hover:bg-white/5"
-            }`}
-          >
-            {item.label}
-          </Link>
-        ))}
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 mr-4 shrink-0">
+          <div className="w-7 h-7 rounded-lg avatar-echo flex items-center justify-center text-white text-xs font-bold shadow-sm">
+            E
+          </div>
+          <span className="font-bold text-ep-accent text-sm tracking-tight">EchoPersona</span>
+        </Link>
+
+        {/* Nav Links */}
+        {NAV_ITEMS.map((item) => {
+          const active = pathname === item.href || pathname.startsWith(item.href + "/");
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all shrink-0 ${
+                active
+                  ? "bg-ep-accent-bg text-ep-accent"
+                  : "text-ep-muted hover:text-ep-text hover:bg-ep-card"
+              }`}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

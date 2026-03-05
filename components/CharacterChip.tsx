@@ -3,17 +3,20 @@ interface CharacterChipProps {
   displayName?: string;
   selected?: boolean;
   onClick?: () => void;
+  color?: string;
 }
 
-export default function CharacterChip({ slug, displayName, selected, onClick }: CharacterChipProps) {
+export default function CharacterChip({
+  slug, displayName, selected, onClick, color,
+}: CharacterChipProps) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-lg border text-sm transition-all ${
+      className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
         selected
-          ? "bg-ep-accent/20 border-ep-accent text-ep-accent"
-          : "bg-transparent border-ep-border text-gray-400 hover:border-gray-500 hover:text-white"
+          ? "bg-ep-accent-bg border-blue-300 text-ep-accent shadow-sm"
+          : "bg-white border-ep-border text-ep-muted hover:border-ep-border2 hover:text-ep-text"
       }`}
     >
       {displayName ?? slug}

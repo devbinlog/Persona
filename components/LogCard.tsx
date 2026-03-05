@@ -5,45 +5,66 @@ interface LogCardPayload {
   intent?: string;
   tags?: string[];
   shortLore?: string;
-  timestamp?: string;
   topic?: string;
   highlightLines?: string[];
+  recommendations?: { title: string; artist: string; genre: string }[];
 }
 
-export default function LogCard({ payload, type }: { payload: LogCardPayload; type: string }) {
+export default function LogCard({
+  payload,
+  type,
+}: {
+  payload: LogCardPayload;
+  type: string;
+}) {
   return (
-    <div className="border border-ep-border rounded-lg p-4 bg-ep-surface space-y-2">
-      <div className="flex items-center gap-2 justify-between">
-        <span className="text-xs text-gray-500 font-mono uppercase">{type} LOG</span>
+    <div className="border border-ep-border rounded-2xl p-5 bg-white shadow-card space-y-3">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-mono font-medium text-ep-muted uppercase tracking-wider">
+          {type} LOG CARD
+        </span>
         {payload.emotionState && <EmotionBadge state={payload.emotionState} />}
       </div>
 
+      {/* Topic */}
       {payload.topic && (
-        <p className="text-sm text-gray-300">
-          <span className="text-gray-500">topic: </span>{payload.topic}
+        <p className="text-sm text-ep-muted">
+          <span className="text-ep-faint">topic · </span>
+          <span className="text-ep-text font-medium">{payload.topic}</span>
         </p>
       )}
 
+      {/* Short lore */}
       {payload.shortLore && (
-        <p className="text-sm text-white italic">&ldquo;{payload.shortLore}&rdquo;</p>
+        <div className="bg-ep-accent-bg rounded-xl px-4 py-3">
+          <p className="text-sm text-ep-accent italic leading-relaxed">
+            &ldquo;{payload.shortLore}&rdquo;
+          </p>
+        </div>
       )}
 
+      {/* Highlight lines */}
       {payload.highlightLines && payload.highlightLines.length > 0 && (
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           {payload.highlightLines.map((line, i) => (
-            <p key={i} className="text-xs text-gray-400 border-l-2 border-ep-accent/40 pl-2">
+            <p
+              key={i}
+              className="text-sm text-ep-muted border-l-2 border-ep-accent/40 pl-3"
+            >
               {line}
             </p>
           ))}
         </div>
       )}
 
+      {/* Tags */}
       {payload.tags && payload.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           {payload.tags.map((tag) => (
             <span
               key={tag}
-              className="text-xs px-2 py-0.5 rounded-full bg-ep-accent/10 text-ep-accent/80"
+              className="text-xs px-2.5 py-0.5 rounded-full bg-ep-accent-bg text-ep-accent font-medium"
             >
               #{tag}
             </span>
@@ -51,8 +72,26 @@ export default function LogCard({ payload, type }: { payload: LogCardPayload; ty
         </div>
       )}
 
+      {/* Intent */}
       {payload.intent && (
-        <p className="text-xs text-gray-500">intent: {payload.intent}</p>
+        <p className="text-xs text-ep-faint">
+          intent ·{" "}
+          <span className="text-ep-muted">{payload.intent}</span>
+        </p>
+      )}
+
+      {/* Recommendations inside card */}
+      {payload.recommendations && payload.recommendations.length > 0 && (
+        <div className="border-t border-ep-border pt-3 space-y-1">
+          <p className="text-xs font-medium text-ep-muted mb-2">Recommended tracks</p>
+          {payload.recommendations.slice(0, 3).map((r) => (
+            <div key={r.title} className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-ep-accent/40 shrink-0" />
+              <span className="text-xs text-ep-text font-medium">{r.title}</span>
+              <span className="text-xs text-ep-faint">— {r.artist}</span>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
